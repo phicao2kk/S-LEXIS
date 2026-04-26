@@ -85,75 +85,71 @@
         .custom-tooltip b { color: var(--indigo); text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 4px; }
 
         /* Tối ưu Mobile Layout */
-/* Tối ưu Mobile Layout - CHỈ CHẠY TRÊN ĐIỆN THOẠI */
 @media (max-width: 1024px) {
-    /* 1. Sửa lỗi Header bị tràn */
+    /* 1. Header gọn lại */
     header {
         padding: 0 1rem !important;
         justify-content: space-between;
     }
     header h1 { font-size: 1rem !important; }
-    .header-info { display: none !important; } /* Ẩn bớt info robot cho đỡ chật */
 
-    /* 2. Sửa lỗi Layout tổng thể: Chuyển từ ngang sang dọc */
+    /* 2. Layout chảy dọc tự nhiên */
     .flex-h-screen-mobile {
         height: auto !important; 
-        display: flex;
-        flex-direction: column;
+        overflow-y: auto !important;
     }
     .main-layout-mobile {
         flex-direction: column !important;
-        overflow: visible !important;
         height: auto !important;
+        overflow: visible !important;
     }
 
-    /* 3. Sửa Sidebar (Thanh menu): Chuyển xuống dưới cùng (Bottom Nav) */
-     .sidebar-mobile {
+    /* 3. ĐƯA THANH MENU LÊN TRÊN (DƯỚI HEADER) */
+    .sidebar-mobile {
         width: 100% !important;
-        height: 60px !important; /* Thu nhỏ chiều cao lại cho gọn */
-        flex-direction: row !important;
-        position: relative !important; /* Bỏ chế độ fixed (cố định ở đáy) */
+        height: 70px !important;
+        flex-direction: row !important; /* Nằm ngang */
+        position: relative !important; /* KHÔNG cố định ở đáy nữa */
         bottom: auto !important;
         left: auto !important;
-        z-index: 10;
+        z-index: 50;
         justify-content: center !important;
-        gap: 20px !important; /* Tạo khoảng cách giữa 2 nút */
+        gap: 30px !important;
         border-right: none !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; /* Đổi viền từ trên xuống dưới */
-        background: rgba(2, 6, 23, 0.3) !important; /* Làm nền mờ nhẹ để tiệp với giao diện */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        background: rgba(2, 6, 23, 0.8) !important;
         padding: 10px 0 !important;
     }
+
+    /* Đưa dấu gạch tím xuống dưới chân nút cho đẹp khi nằm ngang */
     .nav-btn.active::before {
         left: 50% !important;
         bottom: -5px !important;
         top: auto !important;
-        width: 20px !important;
+        width: 24px !important;
         height: 3px !important;
         transform: translateX(-50%);
     }
 
-    /* 4. Sửa vùng làm việc (Main Content) */
+    /* 4. Vùng viết bài */
     main {
         padding: 1rem !important;
-        padding-bottom: 10px !important; /* Giảm padding bottom */
-        overflow: visible !important;
+        padding-bottom: 30px !important;
     }
-
     .editor-container-mobile {
-        min-height: 350px !important;
+        min-height: 400px !important;
     }
     #essay-editor {
-        padding: 15px !important;
+        padding: 20px !important;
         font-size: 1rem !important;
     }
 
-    /* 5. Sửa Aside (Bảng phân tích): Đẩy xuống dưới cùng để không đè lên Editor */
+    /* 5. Vùng chẩn đoán đẩy xuống cuối bài */
     .aside-mobile {
         width: 100% !important;
         border-left: none !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         padding: 1.5rem !important;
-        padding-bottom: 40px !important; /* Giảm từ 100px xuống 40px */
         background: rgba(2, 6, 23, 0.4) !important;
     }
     
