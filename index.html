@@ -85,9 +85,9 @@
         .custom-tooltip b { color: var(--indigo); text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 4px; }
 
         /* Tối ưu Mobile Layout */
-/* TỐI ƯU MOBILE - GỘP LOGIC & SẮP XẾP LẠI THỨ TỰ NÚT */
+/* TỐI ƯU MOBILE - THỨ TỰ: NÚT ARCHITECT -> HEADER -> NÚT STUDIO */
 @media (max-width: 1024px) {
-    /* 1. Thiết lập khung bao ngoài thành cột để dùng thuộc tính 'order' */
+    /* 1. Biến khung bao ngoài cùng thành cột để sắp xếp thứ tự */
     .flex-h-screen-mobile {
         display: flex !important;
         flex-direction: column !important;
@@ -95,61 +95,65 @@
         overflow-y: auto !important;
     }
 
-    /* 2. Giải phóng các thẻ bọc để các phần tử con đứng cùng hàng với Header */
+    /* 2. "Phá bỏ" các thẻ bọc để nút bấm và header có thể đứng chung hàng điều khiển */
     .main-layout-mobile, 
     .sidebar-mobile {
         display: contents !important;
     }
 
-    /* 3. ĐIỀU CHỈNH THỨ TỰ (ORDER) */
-    
+    /* 3. SẮP XẾP THỨ TỰ (ORDER) */
+
     /* Nút Architect (Bộ não) - Vị trí 1 (Trên cùng) */
     #nav-architect {
         order: 1 !important;
         width: 50px !important;
         height: 50px !important;
-        margin: 10px auto !important;
+        margin: 15px auto 5px auto !important; /* Căn giữa */
         background: rgba(99, 102, 241, 0.1) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
         display: flex !important;
     }
 
-    /* Header (Khoanh tím) - Vị trí 2 (Giữa 2 nút) */
+    /* Header (Khoanh tím) - Vị trí 2 (Nằm giữa) */
     header {
         order: 2 !important;
-        padding: 0 1rem !important;
-        height: 60px !important;
-        position: sticky !important;
-        top: 0;
-        z-index: 50;
+        width: 100% !important;
+        height: auto !important;
+        padding: 10px 1rem !important;
+        position: relative !important;
+        background: transparent !important;
+        border: none !important;
+        flex-direction: column !important; /* Cho logo và status AI xếp dọc cho gọn */
+        gap: 10px !important;
     }
-    header h1 { font-size: 1rem !important; }
-    header .flex.items-center.gap-4.px-4 { display: none !important; } /* Ẩn bớt robot AI cho gọn */
+    header h1 { font-size: 1.2rem !important; }
+    header .flex.items-center.gap-4.px-4 { width: fit-content !important; margin: 0 auto !important; }
 
     /* Nút Studio (Cây bút) - Vị trí 3 (Dưới Header) */
     #nav-studio {
         order: 3 !important;
         width: 50px !important;
         height: 50px !important;
-        margin: 10px auto !important;
+        margin: 5px auto 15px auto !important; /* Căn giữa */
         background: rgba(99, 102, 241, 0.1) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
         display: flex !important;
     }
 
-    /* Vùng nội dung viết bài - Vị trí 4 */
+    /* Vùng nội dung chính (Soạn thảo) - Vị trí 4 */
     main {
         order: 4 !important;
-        padding: 1rem !important;
+        padding: 15px !important;
+        height: auto !important;
         overflow: visible !important;
     }
     #essay-editor {
+        min-height: 300px !important;
         padding: 20px !important;
         font-size: 1rem !important;
-        min-height: 350px !important;
     }
 
-    /* Vạch màu tím của nút Active (Chuyển thành gạch chân dưới nút) */
+    /* Vạch tím trang trí của nút (Active) */
     .nav-btn.active::before {
         left: 50% !important;
         bottom: -5px !important;
@@ -157,22 +161,17 @@
         width: 20px !important;
         height: 3px !important;
         transform: translateX(-50%) !important;
+        box-shadow: 0 0 10px var(--indigo) !important;
     }
 
-    /* Bảng phân tích (Checklist & Chart) - Vị trí 5 (Dưới cùng) */
+    /* Bảng phân tích (Cột phải) - Vị trí 5 (Dưới cùng) */
     .aside-mobile {
         order: 5 !important;
         width: 100% !important;
         border-left: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-        padding: 1.5rem !important;
-        background: rgba(2, 6, 23, 0.4) !important;
-        padding-bottom: 40px !important;
-    }
-
-    #radarChart {
-        max-width: 280px !important;
-        margin: 0 auto !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 20px !important;
+        padding-bottom: 60px !important;
     }
 }
 
