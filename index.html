@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- 1. Icon cho iPhone/iPad (iOS) -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/RTXfrfdZ/S-LEXIS.png">
+
+    <!-- 2. Icon cho Android/Chrome -->
+    <link rel="icon" type="image/png" href="https://i.ibb.co/RTXfrfdZ/S-LEXIS.png">
+
+    <!-- 3. Tên hiển thị dưới Icon trên màn hình chính -->
+    <meta name="apple-mobile-web-app-title" content="S-LEXIS PRO">
+
+    <!-- 4. Chế độ chạy như App (Ẩn thanh địa chỉ trình duyệt) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- 5. Màu sắc thanh trạng thái trên Mobile -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020617">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S-LEXIS PRO • Neural Writing Studio v7.0</title>
@@ -397,6 +414,38 @@
     </div>
 
     <script>
+        // --- HỆ THỐNG BẢO MẬT: CHẶN F12 & INSPECT ---
+document.addEventListener('keydown', function (e) {
+    // 1. Chặn F12 (keyCode 123)
+    if (e.keyCode === 123) {
+        window.location.href = "about:blank";
+        e.preventDefault();
+        return false;
+    }
+
+    // 2. Chặn Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Phím tắt Inspect/Console)
+    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+        window.location.href = "about:blank";
+        e.preventDefault();
+        return false;
+    }
+
+    // 3. Chặn Ctrl+U (Xem nguồn trang - View Source)
+    if (e.ctrlKey && e.keyCode === 85) {
+        window.location.href = "about:blank";
+        e.preventDefault();
+        return false;
+    }
+    
+    // LƯU Ý: Không chặn phím Ctrl + (+) hoặc Ctrl + (-) để người dùng ZOOM bình thường
+});
+
+// 4. Chặn Chuột phải (Context Menu) để ngăn Inspect bằng chuột
+document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    return false;
+});
+
         function getCaret(el) {
     let pos = 0;
     const sel = window.getSelection();
