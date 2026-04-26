@@ -85,7 +85,81 @@
         .custom-tooltip b { color: var(--indigo); text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 4px; }
 
         /* Tối ưu Mobile Layout */
+/* Tối ưu Mobile Layout - CHỈ CHẠY TRÊN ĐIỆN THOẠI */
 @media (max-width: 1024px) {
+    /* 1. Sửa lỗi Header bị tràn */
+    header {
+        padding: 0 1rem !important;
+        justify-content: space-between;
+    }
+    header h1 { font-size: 1rem !important; }
+    .header-info { display: none !important; } /* Ẩn bớt info robot cho đỡ chật */
+
+    /* 2. Sửa lỗi Layout tổng thể: Chuyển từ ngang sang dọc */
+    .flex-h-screen-mobile {
+        height: auto !important; 
+        display: flex;
+        flex-direction: column;
+    }
+    .main-layout-mobile {
+        flex-direction: column !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    /* 3. Sửa Sidebar (Thanh menu): Chuyển xuống dưới cùng (Bottom Nav) */
+    .sidebar-mobile {
+        width: 100% !important;
+        height: 65px !important;
+        flex-direction: row !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 1000;
+        justify-content: space-around !important;
+        border-right: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(2, 6, 23, 0.95);
+        padding: 0 10px !important;
+    }
+    .nav-btn.active::before {
+        left: 50% !important;
+        bottom: -5px !important;
+        top: auto !important;
+        width: 20px !important;
+        height: 3px !important;
+        transform: translateX(-50%);
+    }
+
+    /* 4. Sửa vùng làm việc (Main Content) */
+    main {
+        padding: 1rem !important;
+        padding-bottom: 20px !important;
+        overflow: visible !important;
+    }
+    .editor-container-mobile {
+        min-height: 350px !important;
+    }
+    #essay-editor {
+        padding: 15px !important;
+        font-size: 1rem !important;
+    }
+
+    /* 5. Sửa Aside (Bảng phân tích): Đẩy xuống dưới cùng để không đè lên Editor */
+    .aside-mobile {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 1.5rem !important;
+        padding-bottom: 100px !important; /* Tránh bị che bởi thanh điều hướng */
+        background: rgba(2, 6, 23, 0.4) !important;
+    }
+    
+    #radarChart {
+        max-width: 300px !important;
+        margin: 0 auto;
+    }
+
     .flex-h-screen-mobile {
         height: auto !important;
         overflow-y: auto !important;
@@ -168,7 +242,7 @@
         </div>
     </div>
 
-    <div class="flex h-screen flex-col **flex-h-screen-mobile**">
+    <div class="flex h-screen flex-col flex-h-screen-mobile">
         <!-- HEADER -->
         <header class="h-16 flex items-center justify-between px-8 border-b border-white/5 bg-slate-950/80 z-50 backdrop-blur-xl shadow-2xl">
             <div class="flex items-center gap-4 group cursor-pointer" onclick="location.reload()">
@@ -199,7 +273,7 @@
 </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden **main-layout-mobile**">
+        <div class="flex flex-1 overflow-hidden main-layout-mobile">
             <!-- Sidebar icons -->
             <div class="w-16 border-r border-white/5 bg-slate-950/50 flex flex-col items-center py-8 gap-6 sidebar-mobile">
                 <!-- Nút Architect -->
@@ -373,7 +447,7 @@
 </main>
 
             <!-- CỘT CHẨN ĐOÁN -->
-            <aside class="w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto **aside-mobile**">
+            <aside class="aside-mobile w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto **aside-mobile**">
                 <!-- Bổ sung Checklist vào Sidebar bên phải -->
                 <div class="mb-6 p-5 glass rounded-3xl border-indigo-500/30">
                     <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 italic">IELTS Scoring Checklist</h4>
