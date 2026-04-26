@@ -85,108 +85,94 @@
         .custom-tooltip b { color: var(--indigo); text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 4px; }
 
         /* Tối ưu Mobile Layout */
-/* Tối ưu Mobile Layout - CHỈ CHẠY TRÊN ĐIỆN THOẠI */
+/* TỐI ƯU MOBILE - GỘP LOGIC & SẮP XẾP LẠI THỨ TỰ NÚT */
 @media (max-width: 1024px) {
-    /* 1. Sửa lỗi Header bị tràn */
+    /* 1. Thiết lập khung bao ngoài thành cột để dùng thuộc tính 'order' */
+    .flex-h-screen-mobile {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow-y: auto !important;
+    }
+
+    /* 2. Giải phóng các thẻ bọc để các phần tử con đứng cùng hàng với Header */
+    .main-layout-mobile, 
+    .sidebar-mobile {
+        display: contents !important;
+    }
+
+    /* 3. ĐIỀU CHỈNH THỨ TỰ (ORDER) */
+    
+    /* Nút Architect (Bộ não) - Vị trí 1 (Trên cùng) */
+    #nav-architect {
+        order: 1 !important;
+        width: 50px !important;
+        height: 50px !important;
+        margin: 10px auto !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        display: flex !important;
+    }
+
+    /* Header (Khoanh tím) - Vị trí 2 (Giữa 2 nút) */
     header {
+        order: 2 !important;
         padding: 0 1rem !important;
-        justify-content: space-between;
+        height: 60px !important;
+        position: sticky !important;
+        top: 0;
+        z-index: 50;
     }
     header h1 { font-size: 1rem !important; }
-    .header-info { display: none !important; } /* Ẩn bớt info robot cho đỡ chật */
+    header .flex.items-center.gap-4.px-4 { display: none !important; } /* Ẩn bớt robot AI cho gọn */
 
-    /* 2. Sửa lỗi Layout tổng thể: Chuyển từ ngang sang dọc */
-    .flex-h-screen-mobile {
-        height: auto !important; 
-        display: flex;
-        flex-direction: column;
+    /* Nút Studio (Cây bút) - Vị trí 3 (Dưới Header) */
+    #nav-studio {
+        order: 3 !important;
+        width: 50px !important;
+        height: 50px !important;
+        margin: 10px auto !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        display: flex !important;
     }
-    .main-layout-mobile {
-        flex-direction: column !important;
+
+    /* Vùng nội dung viết bài - Vị trí 4 */
+    main {
+        order: 4 !important;
+        padding: 1rem !important;
         overflow: visible !important;
-        height: auto !important;
+    }
+    #essay-editor {
+        padding: 20px !important;
+        font-size: 1rem !important;
+        min-height: 350px !important;
     }
 
-    /* 3. Sửa Sidebar (Thanh menu): Chuyển xuống dưới cùng (Bottom Nav) */
-    .sidebar-mobile {
-        width: 100% !important;
-        height: 65px !important;
-        flex-direction: row !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        z-index: 1000;
-        justify-content: space-around !important;
-        border-right: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-        background: rgba(2, 6, 23, 0.95);
-        padding: 0 10px !important;
-    }
+    /* Vạch màu tím của nút Active (Chuyển thành gạch chân dưới nút) */
     .nav-btn.active::before {
         left: 50% !important;
         bottom: -5px !important;
         top: auto !important;
         width: 20px !important;
         height: 3px !important;
-        transform: translateX(-50%);
+        transform: translateX(-50%) !important;
     }
 
-    /* 4. Sửa vùng làm việc (Main Content) */
-    main {
-        padding: 1rem !important;
-        padding-bottom: 20px !important;
-        overflow: visible !important;
-    }
-    .editor-container-mobile {
-        min-height: 350px !important;
-    }
-    #essay-editor {
-        padding: 15px !important;
-        font-size: 1rem !important;
-    }
-
-    /* 5. Sửa Aside (Bảng phân tích): Đẩy xuống dưới cùng để không đè lên Editor */
+    /* Bảng phân tích (Checklist & Chart) - Vị trí 5 (Dưới cùng) */
     .aside-mobile {
+        order: 5 !important;
         width: 100% !important;
         border-left: none !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         padding: 1.5rem !important;
-        padding-bottom: 100px !important; /* Tránh bị che bởi thanh điều hướng */
         background: rgba(2, 6, 23, 0.4) !important;
-    }
-    
-    #radarChart {
-        max-width: 300px !important;
-        margin: 0 auto;
+        padding-bottom: 40px !important;
     }
 
-    .flex-h-screen-mobile {
-        height: auto !important;
-        overflow-y: auto !important;
-    }
-    .main-layout-mobile {
-        flex-direction: column !important;
-    }
-    .sidebar-mobile {
-        width: 100% !important;
-        height: 60px !important;
-        flex-direction: row !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        z-index: 1000;
-        justify-content: center !important;
-        border-right: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    .aside-mobile {
-        width: 100% !important;
-        border-l: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-        padding-bottom: 80px !important; /* Tránh bị che bởi thanh điều hướng mobile */
-    }
-    .editor-container-mobile {
-        min-height: 400px !important;
+    #radarChart {
+        max-width: 280px !important;
+        margin: 0 auto !important;
     }
 }
 
