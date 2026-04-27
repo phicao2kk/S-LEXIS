@@ -19,7 +19,7 @@
     <meta name="theme-color" content="#020617">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>S-LEXIS PRO • Neural Writing Studio v7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,6 +30,12 @@
             --indigo: #6366f1; --rose: #f472b6; --emerald: #10b981; 
             --red: #ef4444; --bg: #020617; --card: rgba(15, 23, 42, 0.7);
         }
+
+        html {
+            scroll-behavior: smooth;
+            height: -webkit-fill-available;
+       }   
+        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f1f5f9; overflow-x: hidden; }
         
         .mesh-bg {
@@ -324,7 +330,7 @@
         </h5>
         <input type="text" id="topic-input" oninput="analyzeTopic(this.value)" 
             placeholder="Dán đề bài IELTS của bạn vào đây để AI bắt đầu phân tích..." 
-            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-sm outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200 placeholder:text-slate-600">
+            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-base outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200 placeholder:text-slate-600">
     </div>
 
     <!-- Step 2: Results -->
