@@ -2634,15 +2634,12 @@ function updateBoardUI(s) {
     ]);
 }
 
-    document.getElementById('essay-editor').addEventListener('input', () => {
+document.getElementById('essay-editor').addEventListener('input', () => {
     const text = document.getElementById('essay-editor').innerText;
-    document.getElementById('wc').innerText = text.split(/\s+/).filter(w => w).length;
+    const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+    document.getElementById('wc').innerText = words.length;
     
-    // Tự động quét sau khi ngừng gõ 1.2s
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-        masterScanner(); 
-    }, 1200);
+    // ĐÃ LOẠI BỎ TỰ ĐỘNG QUÉT AI TẠI ĐÂY ĐỂ TRÁNH GÂY KHÓ CHỊU
 });
 
    // --- HỆ THỐNG ĐIỀU HÀNH TABS SẠCH ---
@@ -3154,14 +3151,6 @@ function transferToStudio() {
     switchTab('studio');
     showAiToast("Dàn ý đã được ghim!");
 }
-
-let typingTimer;
-document.getElementById('essay-editor').addEventListener('input', () => {
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-        masterScanner(); 
-    }, 1200); 
-});
 
 document.getElementById('essay-editor').addEventListener('input', () => {
     const text = document.getElementById('essay-editor').innerText;
