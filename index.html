@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co/RTXfrfdZ/S-LEXIS.png">
 
     <!-- 3. Tên hiển thị dưới Icon trên màn hình chính -->
-    <meta name="apple-mobile-web-app-title" content="S-LEXIS PRO">
+    <meta name="apple-mobile-web-app-title" content="S-LEXIS">
 
     <!-- 4. Chế độ chạy như App (Ẩn thanh địa chỉ trình duyệt) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,8 +19,8 @@
     <meta name="theme-color" content="#020617">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S-LEXIS PRO • Neural Writing Studio v7.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>S-LEXIS STUDIO • ADVANCED LEXICAL AI v5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -30,6 +30,12 @@
             --indigo: #6366f1; --rose: #f472b6; --emerald: #10b981; 
             --red: #ef4444; --bg: #020617; --card: rgba(15, 23, 42, 0.7);
         }
+
+        html {
+            scroll-behavior: smooth;
+            height: -webkit-fill-available;
+       }   
+        
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f1f5f9; overflow-x: hidden; }
         
         .mesh-bg {
@@ -66,92 +72,90 @@
         .custom-tooltip {
             position: fixed;
             padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(99, 102, 241, 0.4);
-            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
             color: #f1f5f9;
             font-size: 11px;
+            font-weight: 500;
+            line-height: 1.5;
             z-index: 10000;
             pointer-events: none;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
-            /* Giới hạn chiều rộng linh hoạt */
-            width: 260px;
-            max-width: calc(100vw - 40px); 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            max-width: 250px;
             opacity: 0;
-            display: none;
             transition: opacity 0.2s ease;
+            display: none;
         }
         .custom-tooltip b { color: var(--indigo); text-transform: uppercase; font-size: 9px; display: block; margin-bottom: 4px; }
 
         /* Tối ưu Mobile Layout */
-/* Tối ưu Mobile Layout - CHỈ CHẠY TRÊN ĐIỆN THOẠI */
 @media (max-width: 1024px) {
-    /* 1. Sửa lỗi Header bị tràn */
+    /* 1. Header gọn lại */
     header {
         padding: 0 1rem !important;
         justify-content: space-between;
     }
     header h1 { font-size: 1rem !important; }
-    .header-info { display: none !important; } /* Ẩn bớt info robot cho đỡ chật */
 
-    /* 2. Sửa lỗi Layout tổng thể: Chuyển từ ngang sang dọc */
+    /* 2. Layout chảy dọc tự nhiên */
     .flex-h-screen-mobile {
         height: auto !important; 
-        display: flex;
-        flex-direction: column;
+        overflow-y: auto !important;
     }
     .main-layout-mobile {
         flex-direction: column !important;
-        overflow: visible !important;
         height: auto !important;
+        overflow: visible !important;
     }
 
-    /* 3. Sửa Sidebar (Thanh menu): Chuyển xuống dưới cùng (Bottom Nav) */
+    /* 3. ĐƯA THANH MENU LÊN TRÊN (DƯỚI HEADER) */
     .sidebar-mobile {
         width: 100% !important;
-        height: 65px !important;
-        flex-direction: row !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        z-index: 1000;
-        justify-content: space-around !important;
+        height: 70px !important;
+        flex-direction: row !important; /* Nằm ngang */
+        position: relative !important; /* KHÔNG cố định ở đáy nữa */
+        bottom: auto !important;
+        left: auto !important;
+        z-index: 50;
+        justify-content: center !important;
+        gap: 30px !important;
         border-right: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-        background: rgba(2, 6, 23, 0.95);
-        padding: 0 10px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        background: rgba(2, 6, 23, 0.8) !important;
+        padding: 10px 0 !important;
     }
+
+    /* Đưa dấu gạch tím xuống dưới chân nút cho đẹp khi nằm ngang */
     .nav-btn.active::before {
         left: 50% !important;
         bottom: -5px !important;
         top: auto !important;
-        width: 20px !important;
+        width: 24px !important;
         height: 3px !important;
         transform: translateX(-50%);
     }
 
-    /* 4. Sửa vùng làm việc (Main Content) */
+    /* 4. Vùng viết bài */
     main {
         padding: 1rem !important;
-        padding-bottom: 20px !important;
-        overflow: visible !important;
+        padding-bottom: 30px !important;
     }
     .editor-container-mobile {
-        min-height: 350px !important;
+        min-height: 400px !important;
     }
     #essay-editor {
-        padding: 15px !important;
+        padding: 20px !important;
         font-size: 1rem !important;
     }
 
-    /* 5. Sửa Aside (Bảng phân tích): Đẩy xuống dưới cùng để không đè lên Editor */
+    /* 5. Vùng chẩn đoán đẩy xuống cuối bài */
     .aside-mobile {
         width: 100% !important;
         border-left: none !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
         padding: 1.5rem !important;
-        padding-bottom: 100px !important; /* Tránh bị che bởi thanh điều hướng */
         background: rgba(2, 6, 23, 0.4) !important;
     }
     
@@ -167,18 +171,22 @@
     .main-layout-mobile {
         flex-direction: column !important;
     }
-    .sidebar-mobile {
-        width: 100% !important;
-        height: 60px !important;
-        flex-direction: row !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        z-index: 1000;
-        justify-content: center !important;
-        border-right: none !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
+.sidebar-mobile {
+                width: 100% !important;
+                height: 65px !important;
+                flex-direction: row !important; /* Nằm ngang */
+                position: relative !important; /* Không fixed xuống đáy nữa */
+                top: 0 !important;
+                bottom: auto !important;
+                left: auto !important;
+                justify-content: center !important;
+                gap: 40px !important;
+                padding: 10px 0 !important;
+                background: rgba(2, 6, 23, 0.6) !important;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+                z-index: 100;
+            }
     .aside-mobile {
         width: 100% !important;
         border-l: none !important;
@@ -215,12 +223,14 @@
 .nav-btn.active::before {
     content: '';
     position: absolute;
-    left: -16px;
-    width: 3px;
-    height: 20px;
+    bottom: -8px; /* Đưa xuống dưới icon */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
     background: var(--indigo);
-    border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 15px var(--indigo);
+    border-radius: 4px;
+    box-shadow: 0 0 10px var(--indigo);
 }
 
 .nav-btn:hover:not(.active) {
@@ -242,7 +252,7 @@
         </div>
     </div>
 
-    <div class="flex h-screen flex-col **flex-h-screen-mobile**">
+    <div class="flex h-screen flex-col flex-h-screen-mobile">
         <!-- HEADER -->
         <header class="h-16 flex items-center justify-between px-8 border-b border-white/5 bg-slate-950/80 z-50 backdrop-blur-xl shadow-2xl">
             <div class="flex items-center gap-4 group cursor-pointer" onclick="location.reload()">
@@ -273,7 +283,7 @@
 </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden **main-layout-mobile**">
+        <div class="flex flex-1 overflow-hidden main-layout-mobile">
             <!-- Sidebar icons -->
             <div class="w-16 border-r border-white/5 bg-slate-950/50 flex flex-col items-center py-8 gap-6 sidebar-mobile">
                 <!-- Nút Architect -->
@@ -320,7 +330,7 @@
         </h5>
         <input type="text" id="topic-input" oninput="analyzeTopic(this.value)" 
             placeholder="Dán đề bài IELTS của bạn vào đây để AI bắt đầu phân tích..." 
-            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-sm outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200 placeholder:text-slate-600">
+            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-base outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200 placeholder:text-slate-600">
     </div>
 
     <!-- Step 2: Results -->
@@ -447,7 +457,7 @@
 </main>
 
             <!-- CỘT CHẨN ĐOÁN -->
-            <aside class="w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto **aside-mobile**">
+            <aside class="aside-mobile w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto **aside-mobile**">
                 <!-- Bổ sung Checklist vào Sidebar bên phải -->
                 <div class="mb-6 p-5 glass rounded-3xl border-indigo-500/30">
                     <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 italic">IELTS Scoring Checklist</h4>
@@ -2787,41 +2797,11 @@ document.addEventListener('mouseover', function (e) {
     }
 });
 
-// --- HỆ THỐNG TỰ ĐỘNG CÂN CHỈNH TOOLTIP (NEURAL SMART POSITIONING) ---
+// Giữ nguyên đoạn mousemove để nó đuổi theo chuột
 document.addEventListener('mousemove', function (e) {
     if (neuralTooltip.style.display === 'block') {
-        const tooltipWidth = neuralTooltip.offsetWidth;
-        const tooltipHeight = neuralTooltip.offsetHeight;
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
-        const padding = 20; // Khoảng cách an toàn với mép màn hình
-
-        // Tọa độ dự kiến (mặc định bên phải chuột)
-        let left = e.clientX + 20;
-        let top = e.clientY + 20;
-
-        // 1. KIỂM TRA BIÊN PHẢI: Nếu tràn bên phải, đẩy sang bên trái chuột
-        if (left + tooltipWidth > screenWidth - padding) {
-            left = e.clientX - tooltipWidth - 20;
-        }
-
-        // 2. KIỂM TRA BIÊN TRÁI: Đảm bảo không bị lấn quá lề trái (cho mobile)
-        if (left < padding) {
-            left = padding;
-        }
-
-        // 3. KIỂM TRA BIÊN DƯỚI: Nếu tràn phía dưới, đẩy lên phía trên chuột
-        if (top + tooltipHeight > screenHeight - padding) {
-            top = e.clientY - tooltipHeight - 20;
-        }
-
-        // 4. KIỂM TRA BIÊN TRÊN: Đảm bảo không mất tích ở phía trên
-        if (top < padding) {
-            top = padding;
-        }
-
-        neuralTooltip.style.left = left + 'px';
-        neuralTooltip.style.top = top + 'px';
+        neuralTooltip.style.left = (e.clientX + 15) + 'px';
+        neuralTooltip.style.top = (e.clientY + 15) + 'px';
     }
 });
 
