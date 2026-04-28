@@ -72,7 +72,7 @@
         .custom-tooltip {
             position: fixed;
             padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.95); /* Tăng độ đậm nền để dễ đọc trên Mobile */
             backdrop-filter: blur(10px);
             border: 1px solid rgba(99, 102, 241, 0.3);
             border-radius: 12px;
@@ -83,7 +83,8 @@
             z-index: 10000;
             pointer-events: none;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            max-width: 250px;
+            width: 240px; 
+            max-width: 80vw;
             opacity: 0;
             transition: opacity 0.2s ease;
             display: none;
@@ -2797,11 +2798,41 @@ document.addEventListener('mouseover', function (e) {
     }
 });
 
-// Giữ nguyên đoạn mousemove để nó đuổi theo chuột
+// --- HỆ THỐNG ĐIỀU HƯỚNG THẺ GỢI Ý THÔNG MINH (MOBILE FRIENDLY) ---
 document.addEventListener('mousemove', function (e) {
     if (neuralTooltip.style.display === 'block') {
-        neuralTooltip.style.left = (e.clientX + 15) + 'px';
-        neuralTooltip.style.top = (e.clientY + 15) + 'px';
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const tooltipWidth = neuralTooltip.offsetWidth || 250; // Lấy chiều rộng thực tế
+        const tooltipHeight = neuralTooltip.offsetHeight || 150;
+        const padding = 20; // Khoảng cách an toàn
+
+        let leftPos, topPos;
+
+        // 1. XỬ LÝ THEO CHIỀU NGANG (TRÁNH TRÀN MÉP TRÁI/PHẢI)
+        // Nếu vị trí chạm/chuột nằm ở nửa bên phải màn hình -> Hiển thị thẻ bên trái điểm chạm
+        if (e.clientX > screenWidth / 2) {
+            leftPos = e.clientX - tooltipWidth - padding;
+        } 
+        // Nếu vị trí chạm nằm ở nửa bên trái màn hình -> Hiển thị thẻ bên phải điểm chạm
+        else {
+            leftPos = e.clientX + padding;
+        }
+
+        // 2. XỬ LÝ THEO CHIỀU DỌC (TRÁNH TRÀN MÉP DƯỚI)
+        // Nếu quá sát mép dưới màn hình thì đẩy thẻ lên trên điểm chạm
+        if (e.clientY + tooltipHeight + padding > screenHeight) {
+            topPos = e.clientY - tooltipHeight - padding;
+        } else {
+            topPos = e.clientY + padding;
+        }
+
+        // Đảm bảo không dính sát mép tuyệt đối (Safe Zone)
+        leftPos = Math.max(10, Math.min(leftPos, screenWidth - tooltipWidth - 10));
+        topPos = Math.max(10, topPos);
+
+        neuralTooltip.style.left = leftPos + 'px';
+        neuralTooltip.style.top = topPos + 'px';
     }
 });
 
