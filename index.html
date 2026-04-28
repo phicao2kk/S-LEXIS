@@ -389,7 +389,7 @@
         </div>
 
         <!-- Action Toolbar -->
-        <div class="flex gap-3 w-full md:w-auto">
+        <div class="flex gap-3 w-full md:w-auto sticky top-0 z-[60] bg-[#020617] py-2">
             <button onclick="copyEssay()" class="group flex-1 md:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl glass border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500 group-hover:text-indigo-400"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                 <span class="text-slate-400 group-hover:text-indigo-400">Copy</span>
@@ -3102,12 +3102,13 @@ if (topic.includes("education") || topic.includes("learn") || topic.includes("sc
 function transferToStudio() {
     const structure = document.getElementById('arch-structure').value;
     const plan = document.getElementById('arch-plan').value;
+    const topic = document.getElementById('topic-input').value; // Lấy đề bài thực tế bạn vừa nhập
     const noteBox = document.getElementById('outline-note-display');
     
-    // Phần thay đổi nằm ở đây để giao diện đẹp và không lỗi đè chữ
+    // GIỮ NGUYÊN 100% GIAO DIỆN CỦA BẠN, CHỈ THÊM NÚT THU GỌN
     noteBox.innerHTML = `
         <div class="p-6 md:p-8">
-            <!-- 1. Header: Tiêu đề và Nút Đóng (Sửa lỗi đè chữ) -->
+            <!-- 1. Header: Thêm nút Thu gọn cạnh nút X -->
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
@@ -3115,33 +3116,44 @@ function transferToStudio() {
                         Neural Outline Reference
                     </h3>
                 </div>
-                <button onclick="document.getElementById('outline-note-display').classList.add('hidden')" 
-                        class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
-                    <span class="text-[9px] font-bold text-slate-500 group-hover:text-slate-300 uppercase tracking-widest">Đóng</span>
-                    <span class="text-slate-500 group-hover:text-red-400 font-bold">✕</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- NÚT MỚI: Giúp bạn thu nhỏ lại cho đỡ chật màn hình Mobile -->
+                    <button onclick="toggleOutlineDisplay()" id="btn-toggle-outline" 
+                            class="px-3 py-1.5 rounded-xl border border-white/5 bg-white/5 text-[9px] font-bold text-indigo-400 uppercase tracking-widest hover:bg-indigo-500/10 transition-all">
+                        Thu gọn
+                    </button>
+                    
+                    <button onclick="document.getElementById('outline-note-display').classList.add('hidden')" 
+                            class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
+                        <span class="text-[9px] font-bold text-slate-500 group-hover:text-slate-300 uppercase tracking-widest">Đóng</span>
+                        <span class="text-slate-500 group-hover:text-red-400 font-bold">✕</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- 2. Writing Task Section: Đề bài riêng một Box -->
-            <div class="mb-8 p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] relative overflow-hidden">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-[0.2em]">Writing Task / Đề bài</span>
+            <!-- Bọc toàn bộ nội dung dài vào một ID để ẩn/hiện nhanh -->
+            <div id="collapsible-outline-content">
+                <!-- 2. Writing Task Section: Hiển thị đề bài thực tế -->
+                <div class="mb-8 p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] relative overflow-hidden">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-[0.2em]">Writing Task / Đề bài</span>
+                    </div>
+                    <p class="text-slate-200 text-[13px] md:text-sm leading-relaxed font-medium italic opacity-90">
+                        "${topic || "Chưa có nội dung đề bài..."}"
+                    </p>
                 </div>
-                <p class="text-slate-200 text-[13px] md:text-sm leading-relaxed font-medium italic opacity-90">
-                    "Some people think that it is important to use leisure time for activities that improve the mind, such as reading and learning a new skill. Others feel that it is better to rest the mind during leisure time. Discuss both views and give your opinion."
-                </p>
-            </div>
 
-            <!-- 3. Nội dung Cấu trúc & Ý tưởng -->
-            <div class="space-y-6">
-                <div class="border-l-2 border-indigo-500/30 pl-4">
-                    <div class="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2">Cấu trúc:</div>
-                    <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">${structure}</div>
-                </div>
-                
-                <div class="border-l-2 border-emerald-500/30 pl-4">
-                    <div class="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2">Gợi ý ý tưởng:</div>
-                    <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">${plan}</div>
+                <!-- 3. Nội dung Cấu trúc & Ý tưởng (Giữ nguyên Style của bạn) -->
+                <div class="space-y-6">
+                    <div class="border-l-2 border-indigo-500/30 pl-4">
+                        <div class="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2">Cấu trúc:</div>
+                        <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">${structure}</div>
+                    </div>
+                    
+                    <div class="border-l-2 border-emerald-500/30 pl-4">
+                        <div class="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2">Gợi ý ý tưởng:</div>
+                        <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">${plan}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3150,6 +3162,19 @@ function transferToStudio() {
     noteBox.classList.remove('hidden');
     switchTab('studio');
     showAiToast("Dàn ý đã được ghim!");
+}
+
+// HÀM BỔ TRỢ: Để ẩn/hiện phần nội dung dài khi bạn đang viết bài
+function toggleOutlineDisplay() {
+    const content = document.getElementById('collapsible-outline-content');
+    const btn = document.getElementById('btn-toggle-outline');
+    if (content.style.display === "none") {
+        content.style.display = "block";
+        btn.innerText = "Thu gọn";
+    } else {
+        content.style.display = "none";
+        btn.innerText = "Mở rộng";
+    }
 }
 
 document.getElementById('essay-editor').addEventListener('input', () => {
@@ -3277,5 +3302,14 @@ function copyEssay() {
     </p>
     
 </div>
+
+<!-- Nút Quét Nổi dành riêng cho Mobile -->
+<button onclick="masterScanner()" 
+        class="lg:hidden fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl z-[9999] flex items-center justify-center active:scale-90 transition-transform border-2 border-white/20">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 14 4-4-4-4"/><path d="M3 3.5c1.6 0 3 1.1 3.5 2.5.5 1.4 1.9 2.5 3.5 2.5 1.6 0 3-1.1 3.5-2.5.5-1.4 1.9-2.5 3.5-2.5h3.5"/><path d="M21 12.5v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5"/><path d="M3 12.5h18"/>
+    </svg>
+</button>
+
 </body>
 </html>
