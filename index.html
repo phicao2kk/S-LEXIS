@@ -2648,6 +2648,9 @@ function switchTab(tabName) {
     const architect = document.getElementById('architect-view');
     const btnS = document.getElementById('nav-studio');
     const btnA = document.getElementById('nav-architect');
+    
+    // Lấy ID của cái nút nổi vừa thêm
+    const mobileFab = document.getElementById('mobile-scan-fab');
 
     if (tabName === 'architect') {
         architect.classList.remove('hidden');
@@ -2657,6 +2660,10 @@ function switchTab(tabName) {
         btnA.classList.add('border-indigo-500');
         btnS.classList.add('grayscale');
         btnS.classList.remove('border-indigo-500');
+
+        // ẨN nút Quét nổi khi ở tab Architect
+        if (mobileFab) mobileFab.classList.add('hidden');
+        
     } else {
         studio.classList.remove('hidden');
         architect.classList.add('hidden');
@@ -2665,6 +2672,9 @@ function switchTab(tabName) {
         btnS.classList.add('border-indigo-500');
         btnA.classList.add('grayscale');
         btnA.classList.remove('border-indigo-500');
+
+        // HIỆN nút Quét nổi khi chuyển sang Writing Room
+        if (mobileFab) mobileFab.classList.remove('hidden');
     }
 }
 
@@ -3303,26 +3313,22 @@ function copyEssay() {
     
 </div>
 
-<!-- Nút Quét Thông Minh (Chỉ hiện trên Mobile) -->
-<div class="lg:hidden fixed bottom-8 right-4 z-[9999] animate-bounce-slow">
+<!-- Nút Quét Thông Minh (Chỉ dành cho Mobile & Chỉ hiện trong Writing Room) -->
+<div id="mobile-scan-fab" class="lg:hidden fixed bottom-8 right-4 z-[9999] hidden animate-bounce-slow">
     <button onclick="masterScanner()" 
             class="flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.5)] border border-white/20 active:scale-95 transition-all">
         
-        <!-- Icon Robot/AI -->
         <div class="relative w-5 h-5 flex items-center justify-center">
             <div class="absolute inset-0 border-2 border-white/30 rounded-full animate-ping"></div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
             </svg>
         </div>
-
-        <!-- Nhãn chữ rõ ràng -->
         <span class="text-[11px] font-black uppercase tracking-[0.1em]">Quét & Phân tích AI</span>
     </button>
 </div>
 
 <style>
-    /* Hiệu ứng nhấp nhô nhẹ để gây chú ý mà không gây khó chịu */
     @keyframes bounce-slow {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-5px); }
