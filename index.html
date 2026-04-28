@@ -289,26 +289,101 @@
     }
 }
 
-/* Hiệu ứng mở rộng mượt mà cho khối kết quả Architect */
+/* Trạng thái ban đầu: Đóng kín, không có khoảng cách */
 #architect-results {
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    max-height: 0; /* Mặc định chiều cao bằng 0 */
-    opacity: 0;    /* Mặc định mờ đi */
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    margin-top: 0;
+    margin-bottom: 0;
     overflow: hidden;
-    transform: translateY(30px) scale(0.95); /* Đẩy xuống dưới và thu nhỏ nhẹ */
     pointer-events: none;
+    display: block !important;
 }
 
+/* Trạng thái khi kích hoạt: Mở rộng từ từ cả nội dung và khoảng cách */
 #architect-results.active {
     max-height: 1200px;
     opacity: 1;
     transform: translateY(0) scale(1);
+    margin-top: 32px;   /* Khoảng cách hiện ra mượt mà cùng hiệu ứng */
+    margin-bottom: 40px;
     pointer-events: auto;
-    /* Thêm khoảng cách trên và dưới cho khối kết quả */
-    margin-top: 32px;
-    margin-bottom: 40px; 
 }
 
+/* Nút bấm: Đợi khối trên hiện xong một nửa mới bắt đầu hiện */
+#btn-transfer {
+    opacity: 0;
+    transform: translateY(20px);
+    /* Delay 0.5s để tạo hiệu ứng nối đuôi (stagger) */
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s; 
+    pointer-events: none;
+}
+
+#btn-transfer.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Hiệu ứng Radar xoay cho ô kết quả */
+.neural-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(8px);
+    display: none; /* Ẩn mặc định */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border-radius: inherit;
+    transition: all 0.5s ease;
+}
+
+.radar-circle {
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-top: 2px solid #6366f1;
+    border-radius: 50%;
+    animation: spin-radar 1s linear infinite;
+    position: relative;
+}
+
+.radar-circle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(34, 211, 238, 0.2);
+    border-bottom: 2px solid #22d3ee;
+    border-radius: 50%;
+    margin: -20px 0 0 -20px;
+    animation: spin-radar 1.5s linear infinite reverse;
+}
+
+@keyframes spin-radar {
+    to { transform: rotate(360deg); }
+}
+
+.neural-text {
+    margin-top: 15px;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #818cf8;
+    animation: pulse-text 1.5s infinite;
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
 
     </style>
 </head>
@@ -400,25 +475,38 @@
         </div>
     </div>
 
-    <!-- Step 1: Input -->
+    <!-- Step 1: Input (Textarea tự giãn nơ-ron) -->
     <div class="glass p-8 rounded-[2.5rem] border-indigo-500/20 relative group overflow-hidden">
         <h5 class="text-[10px] font-black uppercase text-indigo-400 mb-5 italic flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
             Step 1: Deep Topic Analysis
         </h5>
-        <input type="text" id="topic-input" oninput="analyzeTopic(this.value)" 
+        <textarea id="topic-input" 
+            oninput="analyzeTopic(this.value); this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';" 
             placeholder="Dán đề bài IELTS của bạn vào đây..." 
-            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-base outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200">
+            rows="1"
+            class="w-full bg-slate-950/40 border border-white/5 rounded-2xl p-5 text-base outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all text-slate-200 resize-none overflow-hidden min-h-[60px]"></textarea>
     </div>
 
-    <!-- Step 2: Results (Khối này sẽ mở ra khi nhập đề) -->
+    <!-- Step 2: Results (Đã thêm các thẻ overlay) -->
     <div id="architect-results">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass p-7 rounded-[2.5rem] border-emerald-500/10 hover:border-emerald-500/30 transition-all group">
+            <!-- Ô Structure -->
+            <div class="glass p-7 rounded-[2.5rem] border-emerald-500/10 hover:border-emerald-500/30 transition-all group relative overflow-hidden">
+                <div id="overlay-struct" class="neural-overlay">
+                    <div class="radar-circle"></div>
+                    <div class="neural-text">Analyzing Logic...</div>
+                </div>
                 <h6 class="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-4">Suggested Structure</h6>
                 <textarea id="arch-structure" readonly class="w-full bg-transparent border-none text-[13px] text-slate-400 h-56 outline-none resize-none" placeholder="Đang chờ dữ liệu..."></textarea>
             </div>
-            <div class="glass p-7 rounded-[2.5rem] border-rose-500/10 hover:border-rose-500/30 transition-all group">
+
+            <!-- Ô Ideas -->
+            <div class="glass p-7 rounded-[2.5rem] border-rose-500/10 hover:border-rose-500/30 transition-all group relative overflow-hidden">
+                <div id="overlay-plan" class="neural-overlay">
+                    <div class="radar-circle"></div>
+                    <div class="neural-text">Mapping Ideas...</div>
+                </div>
                 <h6 class="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-4">Key Arguments & Ideas</h6>
                 <textarea id="arch-plan" readonly class="w-full bg-transparent border-none text-[13px] text-slate-400 h-56 outline-none resize-none" placeholder="Đang chờ dữ liệu..."></textarea>
             </div>
@@ -426,9 +514,8 @@
     </div>
 
     <!-- Nút này phải nằm NGOÀI architect-results để không bị ẩn mất -->
-    <button onclick="transferToStudio()" 
-            class="w-full relative overflow-hidden group bg-indigo-600 hover:bg-indigo-500 py-6 rounded-2xl font-black text-[11px] md:text-[13px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-500/20 active:scale-[0.99]">
-        <span class="relative z-10 flex items-center justify-center gap-4">
+<button id="btn-transfer" onclick="transferToStudio()" class="w-full relative overflow-hidden group bg-indigo-600 hover:bg-indigo-500 py-6 rounded-2xl font-black text-[11px] md:text-[13px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-500/20 active:scale-[0.99]">
+    <span class="relative z-10 flex items-center justify-center gap-4">
             Bắt đầu soạn thảo với dàn ý này
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-2 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </span>
@@ -527,7 +614,7 @@
 </main>
 
             <!-- CỘT CHẨN ĐOÁN -->
-            <aside class="aside-mobile w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto **aside-mobile**">
+            <aside id="diagnostic-sidebar" class="aside-mobile w-[420px] border-l border-white/5 bg-gray-950/30 backdrop-blur-xl p-8 flex flex-col gap-10 overflow-y-auto hidden">
                 <!-- Bổ sung Checklist vào Sidebar bên phải -->
                 <div class="mb-6 p-5 glass rounded-3xl border-indigo-500/30">
                     <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 italic">IELTS Scoring Checklist</h4>
@@ -2715,29 +2802,28 @@ document.getElementById('essay-editor').addEventListener('input', () => {
 function switchTab(tabName) {
     const studio = document.getElementById('studio-view');
     const architect = document.getElementById('architect-view');
+    const sidebar = document.getElementById('diagnostic-sidebar'); // Cột chứa Checklist & Radar
     const btnS = document.getElementById('nav-studio');
     const btnA = document.getElementById('nav-architect');
     const mobileFab = document.getElementById('mobile-scan-fab');
 
     if (tabName === 'architect') {
-        // Hiện tab Phân tích
+        // Giao diện Phân tích: Hiện Architect, Ẩn Studio, Ẩn Sidebar
         architect.classList.remove('hidden');
         studio.classList.add('hidden');
+        if (sidebar) sidebar.classList.add('hidden'); // Ẩn phần Checklist/Radar
         
-        // Sáng đèn LED cho nút Phân tích
         btnA.classList.add('active');
         btnS.classList.remove('active');
-        
         if (mobileFab) mobileFab.classList.add('hidden');
     } else {
-        // Hiện tab Viết bài
+        // Giao diện Viết bài: Hiện Studio, Ẩn Architect, Hiện Sidebar
         studio.classList.remove('hidden');
         architect.classList.add('hidden');
+        if (sidebar) sidebar.classList.remove('hidden'); // Hiện phần Checklist/Radar
         
-        // Sáng đèn LED cho nút Viết bài
         btnS.classList.add('active');
         btnA.classList.remove('active');
-        
         if (mobileFab) mobileFab.classList.remove('hidden');
     }
 }
@@ -2916,37 +3002,65 @@ document.addEventListener('mouseout', function (e) {
     }
 });
 
-// --- LOGIC PHÂN TÍCH ĐỀ BÀI (THE BRAIN) ---
+let lastDetectedTopic = ""; 
+
 function analyzeTopic(val) {
     const structBox = document.getElementById('arch-structure');
     const planBox = document.getElementById('arch-plan');
     const resultsArea = document.getElementById('architect-results');
+    const btnTransfer = document.getElementById('btn-transfer');
+    const overlayStruct = document.getElementById('overlay-struct');
+    const overlayPlan = document.getElementById('overlay-plan');
+    
     const topic = val.toLowerCase().trim();
 
-    // KÍCH HOẠT HIỆU ỨNG TRẢI RA MƯỢT MÀ
-    if (topic.length > 10) {
-        resultsArea.classList.add('active'); 
-    } else {
+    // 1. Nếu đề quá ngắn, reset và ẩn
+    if (topic.length < 5) {
         resultsArea.classList.remove('active');
+        btnTransfer.classList.remove('show');
+        structBox.value = ""; 
+        planBox.value = "";
+        lastDetectedTopic = "";
         return; 
     }
 
-    let ideas = "";
-    let structure = "";
+    // 2. Nhận diện Dạng bài (Structure)
+    let currentStructureType = "";
+    if (topic.includes("discuss") || topic.includes("both") || topic.includes("two views")) {
+        currentStructureType = "DISCUSSION";
+    } else if (topic.includes("agree") || topic.includes("disagree") || topic.includes("opinion") || topic.includes("view")) {
+        currentStructureType = "OPINION";
+    } else if (topic.includes("advantage") || topic.includes("benefit") || topic.includes("positive") || topic.includes("negative") || topic.includes("drawback")) {
+        currentStructureType = "ADVAN";
+    } else {
+        currentStructureType = "PROBLEM";
+    }
 
-    // 1. NHẬN DIỆN DẠNG BÀI (STRUCTURE)
-if (topic.includes("agree") || topic.includes("disagree") || topic.includes("opinion") || topic.includes("think") || topic.includes("believe") || topic.includes("view")) {
-    structure = "DẠNG: OPINION ESSAY (Đưa quan điểm)\n- Intro: Background + Thesis (Agree/Disagree).\n- Body 1: Lý do 1 ủng hộ quan điểm.\n- Body 2: Lý do 2 + Phản biện ý kiến ngược lại.\n- Conclusion: Khẳng định lại lựa chọn.";
-} else if (topic.includes("discuss") || topic.includes("both") || topic.includes("two views") || topic.includes("opposing") || topic.includes("contrasting")) {
-    structure = "DẠNG: DISCUSSION ESSAY (Thảo luận 2 mặt)\n- Intro: Giới thiệu 2 luồng ý kiến.\n- Body 1: Phân tích mặt thứ nhất.\n- Body 2: Phân tích mặt thứ hai + Nêu quan điểm cá nhân.\n- Conclusion: Tóm tắt 2 mặt và chốt lại.";
-} else if (topic.includes("advantage") || topic.includes("benefit") || topic.includes("positive") || topic.includes("negative") || topic.includes("drawback")) {
-    structure = "DẠNG: ADVANTAGES & DISADVANTAGES\n- Intro: Giới thiệu hiện tượng + nêu rõ có cả 2 mặt.\n- Body 1: Lợi ích (Advantages) + ví dụ.\n- Body 2: Tác hại (Disadvantages) + ví dụ.\n- Conclusion: Cân nhắc và kết luận mặt nào nổi trội.";
-} else {
-    structure = "DẠNG: CAUSE / SOLUTION hoặc PROBLEM / SOLUTION\n- Intro: Giới thiệu vấn đề.\n- Body 1: Phân tích nguyên nhân / hậu quả.\n- Body 2: Đề xuất giải pháp khả thi.\n- Conclusion: Tổng kết và kêu gọi hành động.";
-}
+    // 3. Chỉ chạy Radar khi có sự thay đổi rõ rệt về dạng bài hoặc khi mới bắt đầu nhập
+    if (currentStructureType !== lastDetectedTopic) {
+        lastDetectedTopic = currentStructureType;
 
-// 2. NHẬN DIỆN CHỦ ĐỀ VÀ Ý TƯỞNG - BẢN MỞ RỘNG 10+ CHỦ ĐỀ
+        // HIỆN RADAR
+        overlayStruct.style.display = 'flex';
+        overlayPlan.style.display = 'flex';
+        resultsArea.classList.add('active');
 
+        setTimeout(() => {
+            // XỬ LÝ NỘI DUNG STRUCTURE
+            let structureOutput = "";
+            if (currentStructureType === "DISCUSSION") {
+                structureOutput = "DẠNG: DISCUSSION ESSAY (Thảo luận 2 mặt)\n- Intro: Giới thiệu 2 luồng ý kiến.\n- Body 1: Phân tích mặt thứ nhất (Làm 1 công ty suốt đời).\n- Body 2: Phân tích mặt thứ hai (Nhảy việc thường xuyên) + Ý kiến cá nhân.\n- Conclusion: Tóm tắt và chốt lại lựa chọn.";
+            } else if (currentStructureType === "OPINION") {
+                structureOutput = "DẠNG: OPINION ESSAY (Đưa quan điểm)\n- Intro: Background + Thesis (Agree/Disagree).\n- Body 1: Lý do 1 ủng hộ quan điểm.\n- Body 2: Lý do 2 + Phản biện ý kiến ngược lại.\n- Conclusion: Khẳng định lại lựa chọn.";
+            } else if (currentStructureType === "ADVAN") {
+                structureOutput = "DẠNG: ADVANTAGES & DISADVANTAGES\n- Intro: Giới thiệu hiện tượng.\n- Body 1: Lợi ích (Advantages).\n- Body 2: Tác hại (Disadvantages).\n- Conclusion: Mặt nào chiếm ưu thế hơn.";
+            } else {
+                structureOutput = "DẠNG: PROBLEM / SOLUTION\n- Intro: Giới thiệu vấn đề.\n- Body 1: Nguyên nhân / Hậu quả.\n- Body 2: Giải pháp khả thi.\n- Conclusion: Tổng kết.";
+            }
+
+            // XỬ LÝ NỘI DUNG IDEAS (Sửa lỗi biến ideas thành ideasOutput)
+            let ideas= "";
+    
 // =================== 1. EDUCATION (Giáo dục) ===================
 if (topic.includes("education") || topic.includes("learn") || topic.includes("school") || topic.includes("university") || 
     topic.includes("college") || topic.includes("student") || topic.includes("teacher") || topic.includes("curriculum") || 
@@ -3179,8 +3293,17 @@ if (topic.includes("education") || topic.includes("learn") || topic.includes("sc
             "• Global (war, peace, refugee, international)";
 }
 
-    structBox.value = structure;
-    planBox.value = ideas;
+// --- ĐÂY LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ HIỆN CHỮ ---
+            structBox.value = structureOutput; 
+            planBox.value = ideas; // Sửa dòng này thành 'ideas' để khớp với biến bạn dùng ở trên
+
+            // ẨN RADAR KHI XONG
+            overlayStruct.style.display = 'none';
+            overlayPlan.style.display = 'none';
+            btnTransfer.classList.add('show');
+            
+        }, 800);
+    }
 }
 
 // Hàm chuyển dàn ý sang Editor để viết luôn
