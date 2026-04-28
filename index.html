@@ -227,10 +227,11 @@
 }
 
 .nav-label {
-    font-size: 10px;
+    font-size: 9px; /* Giảm nhẹ 1 size để chữ dài không bị thô */
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    white-space: nowrap; /* Đảm bảo chữ không bị ngắt dòng */
     opacity: 0.5;
     transition: all 0.3s ease;
 }
@@ -288,6 +289,26 @@
     }
 }
 
+/* Hiệu ứng mở rộng mượt mà cho khối kết quả Architect */
+#architect-results {
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 0; /* Mặc định chiều cao bằng 0 */
+    opacity: 0;    /* Mặc định mờ đi */
+    overflow: hidden;
+    transform: translateY(30px) scale(0.95); /* Đẩy xuống dưới và thu nhỏ nhẹ */
+    pointer-events: none;
+}
+
+#architect-results.active {
+    max-height: 1200px;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    /* Thêm khoảng cách trên và dưới cho khối kết quả */
+    margin-top: 32px;
+    margin-bottom: 40px; 
+}
+
 
     </style>
 </head>
@@ -335,32 +356,32 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden main-layout-mobile">
-                        <!-- Sidebar icons Nâng Cấp -->
-                    <div class="w-20 border-r border-white/5 bg-slate-950/50 flex flex-col items-center py-8 gap-8 sidebar-mobile transition-all duration-500">
-                        
-                        <!-- Nút Architect: Lập dàn ý -->
-                        <button id="nav-architect" onclick="switchTab('architect')" class="nav-btn active" title="Dàn ý thông minh">
-                            <div class="nav-icon-wrapper">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0 .98 4.96 2.5 2.5 0 0 0 0 5.04 2.5 2.5 0 0 0 .98 4.96 2.5 2.5 0 0 0 1.98 3 2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 4.96.46 2.5 2.5 0 0 0 1.98-3 2.5 2.5 0 0 0-.98-4.96 2.5 2.5 0 0 0 0-5.04 2.5 2.5 0 0 0-.98-4.96 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 12 4.5Z"/>
-                                </svg>
-                            </div>
-                            <span class="nav-label">Outline</span> <!-- Đổi label ngắn gọn hơn cho dễ nhìn -->
-                            <div class="status-dot"></div>
-                        </button>
+                        <!-- Sidebar icons -->
+                        <div class="w-20 border-r border-white/5 bg-slate-950/50 flex flex-col items-center py-8 gap-8 sidebar-mobile transition-all duration-500">
+                            
+                            <!-- Nút Phân tích đề -->
+                            <button id="nav-architect" onclick="switchTab('architect')" class="nav-btn active" title="Phân tích đề & Lập dàn ý">
+                                <div class="nav-icon-wrapper">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0 .98 4.96 2.5 2.5 0 0 0 0 5.04 2.5 2.5 0 0 0 .98 4.96 2.5 2.5 0 0 0 1.98 3 2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 4.96.46 2.5 2.5 0 0 0 1.98-3 2.5 2.5 0 0 0-.98-4.96 2.5 2.5 0 0 0 0-5.04 2.5 2.5 0 0 0-.98-4.96 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 12 4.5Z"/>
+                                    </svg>
+                                </div>
+                                <span class="nav-label">Phân tích</span> <!-- Tên mới cực kỳ rõ ràng -->
+                                <div class="status-dot"></div>
+                            </button>
 
-                        <!-- Nút Studio: Phòng viết -->
-                        <button id="nav-studio" onclick="switchTab('studio')" class="nav-btn" title="Viết bản thảo">
-                            <div class="nav-icon-wrapper">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/>
-                                </svg>
-                            </div>
-                            <span class="nav-label">Studio</span>
-                            <div class="status-dot"></div>
-                        </button>
+                            <!-- Nút Phòng viết bài -->
+                            <button id="nav-studio" onclick="switchTab('studio')" class="nav-btn" title="Soạn thảo & Chấm điểm AI">
+                                <div class="nav-icon-wrapper">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/>
+                                    </svg>
+                                </div>
+                                <span class="nav-label">Viết bài</span> <!-- Tên mới hướng hành động -->
+                                <div class="status-dot"></div>
+                            </button>
 
-                    </div>
+                        </div>
 
             <!-- Vùng làm việc chính -->
             <main class="flex-1 p-8 flex flex-col gap-6 relative overflow-y-auto">
@@ -395,8 +416,9 @@
     </div>
 
     <!-- Step 2: Results -->
+    <div id="architect-results">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Structure Card -->
+        <!-- Card Structure -->
         <div class="glass p-7 rounded-[2.5rem] border-emerald-500/10 hover:border-emerald-500/30 transition-all group">
             <div class="flex justify-between items-center mb-4">
                 <h6 class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Suggested Structure</h6>
@@ -407,7 +429,7 @@
             <textarea id="arch-structure" readonly class="w-full bg-transparent border-none text-[13px] text-slate-400 h-56 outline-none resize-none font-medium leading-relaxed" placeholder="Đang chờ dữ liệu nơ-ron..."></textarea>
         </div>
 
-        <!-- Ideas Card -->
+        <!-- Card Ideas -->
         <div class="glass p-7 rounded-[2.5rem] border-rose-500/10 hover:border-rose-500/30 transition-all group">
             <div class="flex justify-between items-center mb-4">
                 <h6 class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Key Arguments & Ideas</h6>
@@ -419,14 +441,20 @@
         </div>
     </div>
 
-    <!-- Action Button -->
-    <button onclick="transferToStudio()" class="relative overflow-hidden group bg-indigo-600 hover:bg-indigo-500 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-500/20 active:scale-[0.98]">
-        <span class="relative z-10 flex items-center justify-center gap-3">
-            Bắt đầu soạn thảo với dàn ý này
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </span>
-        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-    </button>
+    <!-- Button đã được sửa lỗi nhỏ trên PC -->
+<button onclick="transferToStudio()" 
+        class="mt-8 w-full relative overflow-hidden group bg-indigo-600 hover:bg-indigo-500 py-6 rounded-2xl font-black text-[11px] md:text-[13px] uppercase tracking-[0.2em] transition-all shadow-2xl shadow-indigo-500/20 active:scale-[0.99]">
+    
+    <span class="relative z-10 flex items-center justify-center gap-4">
+        Bắt đầu soạn thảo với dàn ý này
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-2 transition-transform">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+    </span>
+
+    <!-- Hiệu ứng ánh sáng quét qua khi hover -->
+    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+</button>
 </div>
 
         <!-- MODULE 2: STUDIO WRITING ROOM -->
@@ -444,7 +472,9 @@
                     <span class="w-1 h-1 rounded-full bg-indigo-500 animate-ping [animation-delay:0.2s]"></span>
                     <span class="w-1 h-1 rounded-full bg-indigo-500 animate-ping [animation-delay:0.4s]"></span>
                 </div>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">Neural AI đang đợi bản thảo của bạn</p>
+                <p class="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.3em]">
+                    Soạn thảo xong hãy nhấn "Quét AI" để nhận phản hồi
+                </p>            
             </div>
         </div>
 
@@ -476,7 +506,7 @@
         <!-- Real-time Editor -->
         <div class="flex-1 relative overflow-y-auto custom-scrollbar">
             <div id="essay-editor" contenteditable="true" spellcheck="false" 
-                placeholder="Bắt đầu viết bản thảo của bạn tại đây... AI sẽ tự động phân tích khi bạn gõ." 
+                placeholder="Bắt đầu viết bản thảo của bạn tại đây... Sau khi hoàn thành, hãy nhấn 'Quét & Phân tích' để AI kiểm tra lỗi và gợi ý nâng cấp." 
                 class="focus:outline-none p-10 sm:p-14"></div>
         </div>
     </div>
@@ -2778,6 +2808,9 @@ function executeClear() {
         drawRadar([0, 0, 0, 0]);
     }
 
+    const resultsArea = document.getElementById('architect-results');
+    if (resultsArea) resultsArea.classList.remove('active'); // Đóng cánh cửa lại
+
     // 5. Dọn sạch danh sách các Card gợi ý ở cột phải
     const timeline = document.getElementById('results-timeline');
     if (timeline) {
@@ -2911,8 +2944,16 @@ document.addEventListener('mouseout', function (e) {
 function analyzeTopic(val) {
     const structBox = document.getElementById('arch-structure');
     const planBox = document.getElementById('arch-plan');
-    const topic = val.toLowerCase();
-    if (!val || val.length < 5) return;
+    const resultsArea = document.getElementById('architect-results');
+    const topic = val.toLowerCase().trim();
+
+    // KÍCH HOẠT HIỆU ỨNG TRẢI RA MƯỢT MÀ
+    if (topic.length > 10) {
+        resultsArea.classList.add('active'); 
+    } else {
+        resultsArea.classList.remove('active');
+        return; 
+    }
 
     let ideas = "";
     let structure = "";
