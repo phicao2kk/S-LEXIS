@@ -8,7 +8,10 @@ export default async function handler(req, res) {
 
     if (!apiKey) return res.status(500).json({ error: "Thiếu GEMINI_KEY trên Vercel!" });
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    // ĐÃ THAY ĐỔI: Chuyển v1beta thành v1 ở dòng dưới đây
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -29,28 +32,20 @@ export default async function handler(req, res) {
         }],
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.1 // Để kết quả ổn định nhất
-        },
-        // TẮT TẤT CẢ BỘ LỌC AN TOÀN CỦA GOOGLE
-        safetySettings: [
-          { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-          { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-          { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
-          { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
-        ]
+          temperature: 0.1
+        }
       })
     });
 
     const data = await response.json();
 
-    // Nếu Google báo lỗi trực tiếp (ví dụ lỗi Key)
+    // Kiểm tra lỗi từ Google
     if (data.error) {
       return res.status(500).json({ error: "Lỗi Google: " + data.error.message });
     }
 
-    // Nếu AI từ chối trả lời (candidates trống)
     if (!data.candidates || data.candidates.length === 0) {
-      return res.status(500).json({ error: "AI vẫn từ chối trả lời. Hãy thử viết một nội dung khác xem sao." });
+      return res.status(500).json({ error: "AI từ chối trả lời. Thử viết nội dung khác." });
     }
 
     const aiResponseText = data.candidates[0].content.parts[0].text;
