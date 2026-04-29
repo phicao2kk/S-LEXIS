@@ -2672,65 +2672,34 @@ function escapeRegExp(string) {
 // 2. Chuẩn bị Database (Sắp xếp từ dài xuống ngắn)
 const sortedAIKeys = Object.keys(AI_MASTER_DATABASE).sort((a, b) => b.length - a.length);
 
-function masterScanner() {
+async function masterScanner() {
     const editor = document.getElementById('essay-editor');
-    const pos = getCaret(editor);
-    let text = editor.innerText;
-    if (!text.trim()) return;
+    const text = editor.innerText.trim();
+    if (!text) return;
 
     document.getElementById('loader').style.display = 'flex';
-    
-    setTimeout(() => {
-        try {
-            let processedText = text;
-            const replacements = []; 
-            const lowerText = text.toLowerCase();
-            let markerCounter = 0; // Đếm để tạo ID duy nhất
+    document.getElementById('loader-msg').innerText = "DeepSeek AI đang đọc bài viết của bạn...";
 
-            sortedAIKeys.forEach((word, index) => {
-                const escapedWord = escapeRegExp(word);
-                const regexSource = /^[a-zA-Z0-9]+$/.test(word) ? `\\b${escapedWord}\\b` : escapedWord;
-                const regex = new RegExp(regexSource, 'gi');
-                
-                if (lowerText.includes(word.toLowerCase())) {
-                    const data = AI_MASTER_DATABASE[word];
-                    const isError = ['ERROR', 'FORBIDDEN', 'GRAMMAR', 'GRA'].includes(data.type);
-                    const className = isError ? 'error' : 'upgrade';
-                    
-                    processedText = processedText.replace(regex, (matched) => {
-                        markerCounter++;
-                        const mId = `mkr-${markerCounter}`;
-                        const placeholder = `##REP_${markerCounter}##`;
-                        
-                        replacements.push({
-                            id: placeholder,
-                            content: `<span id="${mId}" class="ai-marker ${className}" data-word="${word}" data-hint="${data.hint || ''}" data-new="${data.new || ''}" data-reason="${data.reason || ''}">${matched}</span>`
-                        });
-                        return placeholder;
-                    });
-                }
-            });
+    try {
+        // GỌI ĐẾN FILE ANALYZE.JS TRUNG GIAN
+        const response = await fetch("/api/analyze", {
+            method: 'POST',
+            body: JSON.stringify({ text: text })
+        });
 
-            let finalHtml = processedText;
-            replacements.forEach(item => { finalHtml = finalHtml.replace(item.id, item.content); });
-            editor.innerHTML = finalHtml;
-            setCaret(editor, pos);  
-            
-            const stats = performCalculation(text);
-            updateBoardUI(stats);
-            stackAllCards(); // Cập nhật để lấy thẻ từ DOM
-            updateSmartChecklist(text); 
+        if (!response.ok) throw new Error("Serverless function error");
 
-        } catch (err) {
-            console.error("Lỗi vận hành hệ thống:", err);
-            const advisor = document.getElementById('advisor-msg');
-            if(advisor) {
-                advisor.innerHTML = `<div class="text-red-400"><b>⚠️ LỖI:</b> ${err.message}</div>`;
-            }
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    }, 800);
+        const result = await response.json();
+        
+        // Gọi hàm hiển thị kết quả (giữ nguyên logic hiển thị của bạn)
+        applyAiResults(result, text);
+
+    } catch (err) {
+        console.error("Lỗi:", err);
+        showNeuralToast("Lỗi hệ thống trung gian. Kiểm tra cấu hình Vercel!", "error");
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
 }
 
 // 6. Hàm hiển thị Card suggestions (Bản chuẩn không bị lặp)
