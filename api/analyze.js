@@ -6,10 +6,10 @@ export default async function handler(req, res) {
     const { text } = body;
     const apiKey = process.env.GEMINI_KEY;
 
-    if (!apiKey) return res.status(500).json({ error: "Thiếu GEMINI_KEY trên Vercel!" });
+    if (!apiKey) return res.status(500).json({ error: "Thiếu GEMINI_KEY!" });
 
-    // CẤU HÌNH MỚI: Dùng v1beta với đường dẫn model chuẩn nhất
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // SỬ DỤNG MODEL GEMINI-PRO (ỔN ĐỊNH 100%)
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -17,8 +17,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `Bạn là giám khảo IELTS. Hãy chấm điểm bài luận sau. 
-            TRẢ VỀ JSON THUẦN TÚY TRONG NHÃN CODE JSON, KHÔNG CHỨA CHỮ NÀO KHÁC:
+            text: `Bạn là một giám khảo IELTS chuyên nghiệp. Hãy chấm điểm bài luận dưới đây.
+            YÊU CẦU TRẢ VỀ JSON THUẦN TÚY (KHÔNG KÈM MARKDOWN):
             {
               "band": 7.5,
               "cefr": "C1",
@@ -27,29 +27,36 @@ export default async function handler(req, res) {
                 {"original": "từ cũ", "replacement": "từ mới", "type": "VOCAB", "reason": "giải thích", "hint": "gợi ý"}
               ]
             }
-            BÀI VIẾT: "${text}"`
+            BÀI VIẾT CỦA THÍ SINH: "${text}"`
           }]
         }],
         generationConfig: {
           temperature: 0.1,
-          responseMimeType: "application/json"
+          // Lưu ý: Gemini Pro 1.0 đôi khi không hiểu responseMimeType, 
+          // nên chúng ta sẽ dùng kỹ thuật bóc tách JSON thủ công bên dưới.
         }
       })
     });
 
     const data = await response.json();
 
-    // Nếu vẫn lỗi "Not Found", ta sẽ thử model gemini-pro (bản 1.0 cực kỳ ổn định)
     if (data.error) {
-       return res.status(500).json({ error: "Lỗi Google: " + data.error.message + ". Nếu vẫn không được, hãy thử đổi tên model sang 'gemini-pro' trong code." });
+      return res.status(500).json({ error: "Lỗi Google: " + data.error.message });
     }
 
     if (!data.candidates || data.candidates.length === 0) {
-      return res.status(500).json({ error: "AI từ chối trả lời vì nội dung nhạy cảm." });
+      return res.status(500).json({ error: "AI từ chối trả lời (Nội dung nhạy cảm)." });
     }
 
     const aiResponseText = data.candidates[0].content.parts[0].text;
-    res.status(200).json(JSON.parse(aiResponseText));
+    
+    // BỘ LỌC JSON SIÊU CẤP (Tìm nội dung nằm giữa { và })
+    const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        res.status(200).json(JSON.parse(jsonMatch[0]));
+    } else {
+        res.status(500).json({ error: "AI trả về định dạng không phải JSON: " + aiResponseText });
+    }
 
   } catch (error) {
     res.status(500).json({ error: "Lỗi hệ thống: " + error.message });
