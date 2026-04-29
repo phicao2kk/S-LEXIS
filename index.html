@@ -2672,36 +2672,65 @@ function escapeRegExp(string) {
 // 2. Chuẩn bị Database (Sắp xếp từ dài xuống ngắn)
 const sortedAIKeys = Object.keys(AI_MASTER_DATABASE).sort((a, b) => b.length - a.length);
 
-async function masterScanner() {
+function masterScanner() {
     const editor = document.getElementById('essay-editor');
-    const text = editor.innerText.trim();
-    if (!text) return;
+    const pos = getCaret(editor);
+    let text = editor.innerText;
+    if (!text.trim()) return;
 
     document.getElementById('loader').style.display = 'flex';
+    
+    setTimeout(() => {
+        try {
+            let processedText = text;
+            const replacements = []; 
+            const lowerText = text.toLowerCase();
+            let markerCounter = 0; // Đếm để tạo ID duy nhất
 
-    try {
-        const response = await fetch("/api/analyze", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json', // <--- DÒNG NÀY BẮT BUỘC PHẢI CÓ
-            },
-            body: JSON.stringify({ text: text }) 
-        });
+            sortedAIKeys.forEach((word, index) => {
+                const escapedWord = escapeRegExp(word);
+                const regexSource = /^[a-zA-Z0-9]+$/.test(word) ? `\\b${escapedWord}\\b` : escapedWord;
+                const regex = new RegExp(regexSource, 'gi');
+                
+                if (lowerText.includes(word.toLowerCase())) {
+                    const data = AI_MASTER_DATABASE[word];
+                    const isError = ['ERROR', 'FORBIDDEN', 'GRAMMAR', 'GRA'].includes(data.type);
+                    const className = isError ? 'error' : 'upgrade';
+                    
+                    processedText = processedText.replace(regex, (matched) => {
+                        markerCounter++;
+                        const mId = `mkr-${markerCounter}`;
+                        const placeholder = `##REP_${markerCounter}##`;
+                        
+                        replacements.push({
+                            id: placeholder,
+                            content: `<span id="${mId}" class="ai-marker ${className}" data-word="${word}" data-hint="${data.hint || ''}" data-new="${data.new || ''}" data-reason="${data.reason || ''}">${matched}</span>`
+                        });
+                        return placeholder;
+                    });
+                }
+            });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Lỗi không xác định");
+            let finalHtml = processedText;
+            replacements.forEach(item => { finalHtml = finalHtml.replace(item.id, item.content); });
+            editor.innerHTML = finalHtml;
+            setCaret(editor, pos);  
+            
+            const stats = performCalculation(text);
+            updateBoardUI(stats);
+            stackAllCards(); // Cập nhật để lấy thẻ từ DOM
+            updateSmartChecklist(text); 
+
+        } catch (err) {
+            console.error("Lỗi vận hành hệ thống:", err);
+            const advisor = document.getElementById('advisor-msg');
+            if(advisor) {
+                advisor.innerHTML = `<div class="text-red-400"><b>⚠️ LỖI:</b> ${err.message}</div>`;
+            }
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
-
-        const result = await response.json();
-        applyAiResults(result, text);
-
-    } catch (err) {
-        console.error("Lỗi:", err);
-        showNeuralToast("Hệ thống báo lỗi: " + err.message, "error");
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
+    }, 800);
 }
 
 // 6. Hàm hiển thị Card suggestions (Bản chuẩn không bị lặp)
