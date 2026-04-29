@@ -2678,25 +2678,27 @@ async function masterScanner() {
     if (!text) return;
 
     document.getElementById('loader').style.display = 'flex';
-    document.getElementById('loader-msg').innerText = "DeepSeek AI đang đọc bài viết của bạn...";
 
     try {
-        // GỌI ĐẾN FILE ANALYZE.JS TRUNG GIAN
         const response = await fetch("/api/analyze", {
             method: 'POST',
-            body: JSON.stringify({ text: text })
+            headers: {
+                'Content-Type': 'application/json', // <--- DÒNG NÀY BẮT BUỘC PHẢI CÓ
+            },
+            body: JSON.stringify({ text: text }) 
         });
 
-        if (!response.ok) throw new Error("Serverless function error");
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Lỗi không xác định");
+        }
 
         const result = await response.json();
-        
-        // Gọi hàm hiển thị kết quả (giữ nguyên logic hiển thị của bạn)
         applyAiResults(result, text);
 
     } catch (err) {
         console.error("Lỗi:", err);
-        showNeuralToast("Lỗi hệ thống trung gian. Kiểm tra cấu hình Vercel!", "error");
+        showNeuralToast("Hệ thống báo lỗi: " + err.message, "error");
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
