@@ -6,9 +6,9 @@ export default async function handler(req, res) {
     const { text } = body;
     const apiKey = process.env.GEMINI_KEY;
 
-    if (!apiKey) return res.status(500).json({ error: "Thiếu GEMINI_KEY trên Vercel!" });
+    if (!apiKey) return res.status(500).json({ error: "Thiếu GEMINI_KEY!" });
 
-    // ĐÃ THAY ĐỔI: Chuyển v1beta thành v1 ở dòng dưới đây
+    // Sử dụng v1 ổn định
     const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
         contents: [{
           parts: [{
             text: `Bạn là giám khảo IELTS. Hãy chấm điểm bài luận sau. 
-            TRẢ VỀ JSON THUẦN TÚY, KHÔNG ĐƯỢC CHỨA CHỮ NÀO KHÁC NGOÀI JSON:
+            BẮT BUỘC TRẢ VỀ JSON THUẦN TÚY TRONG NHÃN CODE JSON, KHÔNG ĐƯỢC CHỨA CHỮ NÀO KHÁC:
+            \`\`\`json
             {
               "band": 7.5,
               "cefr": "C1",
@@ -27,31 +28,35 @@ export default async function handler(req, res) {
                 {"original": "từ cũ", "replacement": "từ mới", "type": "VOCAB", "reason": "giải thích", "hint": "gợi ý"}
               ]
             }
+            \`\`\`
             BÀI VIẾT: "${text}"`
           }]
         }],
         generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.1
+          temperature: 0.2 // Giữ cho AI trả lời nghiêm túc
         }
       })
     });
 
     const data = await response.json();
 
-    // Kiểm tra lỗi từ Google
     if (data.error) {
       return res.status(500).json({ error: "Lỗi Google: " + data.error.message });
     }
 
-    if (!data.candidates || data.candidates.length === 0) {
-      return res.status(500).json({ error: "AI từ chối trả lời. Thử viết nội dung khác." });
+    // LẤY VĂN BẢN PHẢN HỒI
+    let aiResponseText = data.candidates[0].content.parts[0].text;
+    
+    // BỘ LỌC THÔNG MINH: Tự động tìm đoạn JSON nằm giữa ```json ... ``` hoặc { ... }
+    const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        const cleanJson = JSON.parse(jsonMatch[0]);
+        res.status(200).json(cleanJson);
+    } else {
+        throw new Error("AI không trả về định dạng JSON chuẩn.");
     }
 
-    const aiResponseText = data.candidates[0].content.parts[0].text;
-    res.status(200).json(JSON.parse(aiResponseText));
-
   } catch (error) {
-    res.status(500).json({ error: "Lỗi hệ thống: " + error.message });
+    res.status(500).json({ error: "Hệ thống gặp sự cố: " + error.message });
   }
 }
