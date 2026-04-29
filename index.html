@@ -60,10 +60,46 @@
             font-style: italic; 
         }
 
-        .ai-marker { cursor: pointer; transition: 0.3s; position: relative; border-radius: 4px; padding: 2px 0; }
-        .ai-marker.error { border-bottom: 3px solid var(--red); background: rgba(239, 68, 68, 0.1); }
-        .ai-marker.upgrade { border-bottom: 3px solid var(--emerald); background: rgba(16, 185, 129, 0.1); }
-        .ai-marker:hover { background: rgba(255, 255, 255, 0.2); filter: brightness(1.3); }
+        /* Màu sắc rực rỡ hơn cho Marker */
+        .ai-marker { 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            border-radius: 4px; 
+            padding: 0 4px; /* Thêm padding để màu nền bao quanh chữ đẹp hơn */
+            font-weight: 600;
+        }
+
+        /* Marker cho lỗi/ngữ pháp (Đỏ rực) */
+        .ai-marker.error { 
+            background: rgba(239, 68, 68, 0.25); 
+            border-bottom: 2px solid #ef4444; 
+            color: #fca5a5;
+        }
+
+        /* Marker cho nâng cấp từ vựng (Xanh indigo/emerald) */
+        .ai-marker.upgrade { 
+            background: rgba(99, 102, 241, 0.25); 
+            border-bottom: 2px solid #6366f1; 
+            color: #a5b4fc;
+        }
+
+        .ai-marker:hover { 
+            background: rgba(255, 255, 255, 0.3); 
+            filter: brightness(1.5); 
+        }
+
+        /* Hiệu ứng nháy sáng khi nhấn từ thẻ gợi ý */
+        @keyframes marker-focus-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); background: #fff; color: #000; }
+            50% { transform: scale(1.2); box-shadow: 0 0 20px 10px rgba(99, 102, 241, 0); background: #6366f1; color: #fff; }
+            100% { transform: scale(1); }
+        }
+
+        .marker-focus {
+            animation: marker-focus-pulse 0.8s ease-out;
+            z-index: 50;
+        }
 
         #loader { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); z-index: 9999; display: none; align-items: center; justify-content: center; }
 
@@ -2642,15 +2678,14 @@ function masterScanner() {
     let text = editor.innerText;
     if (!text.trim()) return;
 
-    // HIỆN LOADER
     document.getElementById('loader').style.display = 'flex';
     
     setTimeout(() => {
         try {
-
             let processedText = text;
             const replacements = []; 
             const lowerText = text.toLowerCase();
+            let markerCounter = 0; // Đếm để tạo ID duy nhất
 
             sortedAIKeys.forEach((word, index) => {
                 const escapedWord = escapeRegExp(word);
@@ -2661,12 +2696,15 @@ function masterScanner() {
                     const data = AI_MASTER_DATABASE[word];
                     const isError = ['ERROR', 'FORBIDDEN', 'GRAMMAR', 'GRA'].includes(data.type);
                     const className = isError ? 'error' : 'upgrade';
-                    const placeholder = `##REPLACE_${index}##`;
                     
                     processedText = processedText.replace(regex, (matched) => {
+                        markerCounter++;
+                        const mId = `mkr-${markerCounter}`;
+                        const placeholder = `##REP_${markerCounter}##`;
+                        
                         replacements.push({
                             id: placeholder,
-                            content: `<span class="ai-marker ${className}" data-hint="${data.hint || ''}" data-new="${data.new || ''}" data-reason="${data.reason || ''}">${matched}</span>`
+                            content: `<span id="${mId}" class="ai-marker ${className}" data-word="${word}" data-hint="${data.hint || ''}" data-new="${data.new || ''}" data-reason="${data.reason || ''}">${matched}</span>`
                         });
                         return placeholder;
                     });
@@ -2680,30 +2718,15 @@ function masterScanner() {
             
             const stats = performCalculation(text);
             updateBoardUI(stats);
-            stackAllCards(text);
+            stackAllCards(); // Cập nhật để lấy thẻ từ DOM
             updateSmartChecklist(text); 
 
         } catch (err) {
             console.error("Lỗi vận hành hệ thống:", err);
-            
-            // HIỂN THỊ LỖI LÊN GIAO DIỆN CHUYÊN NGHIỆP
             const advisor = document.getElementById('advisor-msg');
             if(advisor) {
-                advisor.innerHTML = `
-                    <div class="text-red-400 animate-pulse">
-                        <b class="block mb-2 text-[10px] uppercase tracking-tighter">⚠️ PHÁT HIỆN XUNG ĐỘT NEURAL ENGINE:</b>
-                        <span class="text-white font-bold">${err.message}</span>
-                        <br><br>
-                        <p class="text-[9px] text-red-300/50 italic uppercase font-black">System Status: CRITICAL ERROR</p>
-                    </div>
-                `;
-                // Làm khung Advisor đỏ lên
-                advisor.parentElement.classList.add('border-red-500/50', 'bg-red-500/10', 'shadow-[0_0_20px_rgba(239,68,68,0.2)]');
+                advisor.innerHTML = `<div class="text-red-400"><b>⚠️ LỖI:</b> ${err.message}</div>`;
             }
-
-            // Hiện thêm một cái thông báo nổi (Toast)
-            showNeuralToast("Lỗi hệ thống: " + err.message, "error");
-
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
@@ -2711,29 +2734,64 @@ function masterScanner() {
 }
 
 // 6. Hàm hiển thị Card suggestions (Bản chuẩn không bị lặp)
-function stackAllCards(text) {
+function stackAllCards() {
     const timeline = document.getElementById('results-timeline');
     timeline.innerHTML = "";
-    const lowerText = text.toLowerCase();
     
-    let count = 0;
-    sortedAIKeys.forEach(word => {
-        if(lowerText.includes(word.toLowerCase())){
-            const d = AI_MASTER_DATABASE[word];
-            count++;
-            timeline.innerHTML += `
-                <div class="glass p-5 rounded-2xl border-l-4 mb-4 animate-in slide-in-from-right" 
-                     style="border-color: ${['ERROR', 'FORBIDDEN', 'GRAMMAR', 'GRA'].includes(d.type) ? 'var(--red)' : 'var(--indigo)'}">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-[9px] font-black uppercase text-indigo-400 bg-white/5 px-2 py-0.5 rounded">${d.type}</span>
-                    </div>
-                    <p class="text-[11px] font-bold text-white mb-1">Gợi ý cho: <span class="italic text-indigo-300">'${word}'</span></p>
-                    <div class="text-[13px] font-black text-indigo-100 italic mb-2">→ ${d.new}</div>
-                    <p class="text-[10px] text-slate-500 leading-relaxed">${d.reason || "Nâng cấp từ vựng."}</p>
-                </div>`;
-        }
+    // Lấy tất cả markers đã được render trong editor
+    const markers = document.querySelectorAll('.ai-marker');
+    
+    if (markers.length === 0) {
+        timeline.innerHTML = "<p class='text-center opacity-20 text-xs py-20 uppercase font-black tracking-widest'>Hệ thống chưa phát hiện lỗi</p>";
+        return;
+    }
+
+    markers.forEach((marker) => {
+        const word = marker.getAttribute('data-word');
+        const markerId = marker.id;
+        const d = AI_MASTER_DATABASE[word];
+        const isError = ['ERROR', 'FORBIDDEN', 'GRAMMAR', 'GRA'].includes(d.type);
+        
+        const card = document.createElement('div');
+        card.className = `glass p-5 rounded-2xl border-l-4 mb-4 cursor-pointer hover:bg-white/10 transition-all active:scale-95 animate-in slide-in-from-right`;
+        card.style.borderColor = isError ? 'var(--red)' : 'var(--indigo)';
+        
+        // Sự kiện click để nhảy đến từ
+        card.onclick = () => jumpToMarker(markerId);
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[9px] font-black uppercase text-indigo-400 bg-white/5 px-2 py-0.5 rounded">${d.type}</span>
+                <span class="text-[8px] text-slate-500 font-bold italic">Bấm để xem vị trí →</span>
+            </div>
+            <p class="text-[11px] font-bold text-white mb-1">Cần tối ưu: <span class="italic text-indigo-300">'${marker.innerText}'</span></p>
+            <div class="text-[13px] font-black text-indigo-100 italic mb-2">→ ${d.new}</div>
+            <p class="text-[10px] text-slate-500 leading-relaxed">${d.reason || "Nâng cấp từ vựng học thuật."}</p>
+        `;
+        timeline.appendChild(card);
     });
-    if(count === 0) timeline.innerHTML = "<p class='text-center opacity-20 text-xs py-20'>Bài viết đạt chuẩn, không có gợi ý nâng cấp.</p>";
+}
+
+// Hàm thực hiện việc "nhảy" đến từ trong Editor
+function jumpToMarker(markerId) {
+    const marker = document.getElementById(markerId);
+    if (marker) {
+        // 1. Cuộn đến vị trí marker (nằm giữa màn hình)
+        marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // 2. Thêm class hiệu ứng nháy sáng
+        marker.classList.add('marker-focus');
+        
+        // 3. Xóa class sau khi diễn xong hiệu ứng (0.8s)
+        setTimeout(() => {
+            marker.classList.remove('marker-focus');
+        }, 800);
+
+        // 4. Nếu trên Mobile, có thể thu gọn Sidebar để thấy rõ text (Tùy chọn)
+        if (window.innerWidth < 1024) {
+             // Bạn có thể thêm code cuộn trang lên trên Editor tại đây
+        }
+    }
 }
 
     function showInSidebar(key) {
