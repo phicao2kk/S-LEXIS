@@ -1,21 +1,23 @@
 export default async function handler(req, res) {
-  // 1. Chỉ nhận POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Chỉ nhận POST' });
   }
 
   try {
-    // 2. Lấy dữ liệu an toàn (Vercel tự parse nên không cần JSON.parse nữa)
-    const { text } = req.body;
-    const apiKey = process.env.DEEPSEEK_KEY;
-
-    // 3. Kiểm tra xem Key đã được dán vào Vercel chưa
-    if (!apiKey) {
-      return res.status(500).json({ error: "Lỗi: Bạn chưa cấu hình DEEPSEEK_KEY trên Vercel!" });
+    // Ép kiểu dữ liệu sang JSON nếu Vercel không tự parse
+    let body = req.body;
+    if (typeof body === 'string') {
+        body = JSON.parse(body);
     }
 
-    // 4. Gọi sang DeepSeek
-    const response = await fetch("https://api.deepseek.com/chat/completions", {
+    const text = body.text; // Lấy nội dung bài viết
+    const apiKey = process.env.DEEPSEEK_KEY;
+
+    if (!text) {
+      return res.status(400).json({ error: "Dữ liệu bài viết bị trống (400)" });
+    }
+
+    const dsResponse = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "system",
-            content: "Bạn là chuyên gia IELTS. Phân tích bài viết và trả về JSON: {band: number, cefr: string, stats: {tr, cc, lr, gra}, suggestions: [{original, replacement, type, reason, hint}]}"
+            content: "Bạn là giám khảo IELTS. Phân tích bài viết và trả về JSON chuẩn: {\"band\": 7, \"cefr\": \"C1\", \"stats\": {\"tr\": 7, \"cc\": 7, \"lr\": 7, \"gra\": 7}, \"suggestions\": []}"
           },
           { role: "user", content: text }
         ],
@@ -34,17 +36,17 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    const dsData = await dsResponse.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || "Lỗi từ DeepSeek" });
+    if (!dsResponse.ok) {
+        // Trả về lỗi thật từ DeepSeek (Ví dụ: hết tiền - Insufficient Balance)
+        return res.status(dsResponse.status).json({ error: dsData.error?.message || "Lỗi AI" });
     }
 
-    // 5. Trả kết quả về cho web
-    const aiResult = JSON.parse(data.choices[0].message.content);
-    res.status(200).json(aiResult);
+    const result = JSON.parse(dsData.choices[0].message.content);
+    return res.status(200).json(result);
 
   } catch (error) {
-    res.status(500).json({ error: "Server Error: " + error.message });
+    return res.status(500).json({ error: "Lỗi Server: " + error.message });
   }
 }
